@@ -15,16 +15,6 @@ def the_keys(k)
   arr
 end
 
-def des_encrypt(m,keys)
-  l, r = m.split # Split it to give us Li Ri
-
-  (0..1).each { |i| # Run the encryption rounds
-    l, r = r, l.xor(f(r,keys[i])) # L => R, R => L + f(Ri-1,Ki)
-    puts l.to_s + ":L %s" % i
-    puts r.to_s + ":R %s" % i
-  }
-  rl = r + l # Swap and concatenate the two sides into RiLi
-end
 
 def f(r,k)
  e = r.p1   # Obtain E(Ri-1)
@@ -34,6 +24,43 @@ def f(r,k)
  bs.each_with_index{|b,i| s += b.s_box(i+1)}
  s
 end
+
+def encrypt(m,keys)
+  l, r = m.split # Split it to give us Li Ri
+
+  (0..2).each { |i| # Run the encryption rounds
+    l, r = r, l.xor(f(r,keys[i])) # L => R, R => L + f(Ri-1,Ki)
+    #puts l.to_s + ":L %s" % i
+    #puts r.to_s + ":R %s" % i
+  }
+  rl = r + l # Swap and concatenate the two sides into RiLi
+end
+
+def decrypt(m,keys)
+    l, r = m.split # Split it to give us Li Ri
+  (0..2).to_a.reverse.each { |i| # Run the encryption rounds
+    l, r = r, l.xor(f(r,keys[i])) # L => R, R => L + f(Ri-1,Ki)
+    #puts l.to_s + ":L %s" % i
+    #puts r.to_s + ":R %s" % i
+  }
+  rl = r + l # Swap and concatenate the two sides into RiLi
+end
+
+
+
+#############
+#   Cryptanalysis   #
+#############
+
+def gen_mess(firstdiff, lastdiff)
+
+ # puts "R0 first: %s" % firstdiff.to_s
+
+ puts "Generazione di tutte le possibili combinazioni che danno provengono dai differenziali (%s ,%s)" % [ firstdiff.to_s,  lastdiff.to_s ]
+
+end
+
+
 
 end
 
@@ -47,9 +74,18 @@ d1=Des.new
 
 
 keys = d1.the_keys(k)
-puts "message"+m.to_s
+puts "Original message : "+m.pretty(12)
 #keys.each_with_index { |sk,i| puts "Key %d: %s" % [i,sk.pretty] }
-d1.des_encrypt(m,keys)
+enc = d1.encrypt(m,keys)
+puts "Encrypted message:"+ enc.pretty(12)
+dec= d1.decrypt(enc,keys)
+puts "Decrypted message:"+ dec.pretty(12)
+
+r_0_first = '001100'.to_bits.p1
+
+d1.gen_mess(r_0_first.split4[0],'011') # for S1
+d1.gen_mess(r_0_first.split4[1],'010') # for S1
+
 
 
 

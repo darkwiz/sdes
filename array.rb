@@ -6,7 +6,8 @@ def split
     [self[0,self.length/2], self[self.length/2,self.length]]
 end
 
-# Perform a bitwise permutation on the current array(self,the key), using the passed permutation table (bit)
+# Per ogni elemento della stringa(table) passata effettua una
+# permutazione/espansione sull'array di interesse (self)
 
 def perm(table)
     table.split(' ').map{ |bit| self[bit.to_i-1] }
